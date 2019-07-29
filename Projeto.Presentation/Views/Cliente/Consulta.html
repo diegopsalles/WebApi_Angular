@@ -1,0 +1,213 @@
+﻿<!DOCTYPE html>
+<html ng-app="appCliente">
+<head>
+    <meta charset="utf-8" />
+    <title>Projeto</title>
+
+    <!-- folhas de estilo CSS -->
+    <link href="/Content/bootstrap.min.css" rel="stylesheet" />
+
+</head>
+<body ng-controller="consultaCliente">
+
+    <div class="card card-body bg-dark">
+        <h3 class="text-white">Sistema de Controle de Clientes</h3>
+        <p class="text-white">
+            Sistema Asp.Net WebAPI + Dapper + AngularJS
+        </p>
+    </div>
+
+    <div class="container">
+
+        <br />
+
+        <h4>Consulta de Clientes</h4>
+        <a href="/Index.html">Página inicial</a>
+        <hr />
+
+        <div>
+            <strong>{{mensagem}}</strong>
+        </div>
+
+        <table class="table table-bordered table-striped table-hover"
+               ng-init="consultar()">
+
+            <thead>
+                <tr>
+                    <th class="bg-info text-white">Código</th>
+                    <th class="bg-info text-white">Nome do Cliente</th>
+                    <th class="bg-info text-white">Email</th>
+                    <th class="bg-info text-white">Data de Criação</th>
+                    <th class="bg-info text-white">Operações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr ng-repeat="c in clientes">
+                    <td>{{c.IdCliente}}</td>
+                    <td>{{c.Nome}}</td>
+                    <td>{{c.Email}}</td>
+                    <td>{{c.DataCriacao | date : 'dd/MM/yyyy HH:mm'}}</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm"
+                                data-target="#janelaedicao"
+                                data-toggle="modal"
+                                ng-click="obter(c.IdCliente)">
+                            Atualizar
+                        </button>
+
+                        <button class="btn btn-danger btn-sm"
+                                data-target="#janelaexclusao"
+                                data-toggle="modal"
+                                ng-click="obter(c.IdCliente)">
+                            Excluir
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+
+            <tfoot>
+                <tr>
+                    <td colspan="5">
+                        Quantidade de Clientes: {{clientes.length}}
+                    </td>
+                </tr>
+            </tfoot>
+
+        </table>
+
+    </div>
+
+    <!-- janela modal para exclusão -->
+    <div id="janelaexclusao" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h3 class="text-white">Exclusão de Cliente</h3>
+                </div>
+                <div class="modal-body">
+                    Código: {{cliente.IdCliente}}
+                    <br/>
+                    Nome do Cliente: {{cliente.Nome}}
+                    <br/>
+                    Email: {{cliente.Email}}
+                    <br />
+                    Data de Criação: {{cliente.DataCriacao | date : 'dd/MM/yyyy'}}
+                    <br />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-warning" data-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-danger" data-dismiss="modal"
+                            ng-click="excluir()">
+                        Excluir Cliente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="janelaedicao" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary">
+                    <h3 class="text-white">Atualizar Cliente</h3>
+                </div>
+                <div class="modal-body">
+
+                    <label>Nome do Cliente:</label>
+                    <input type="text" class="form-control"
+                           placeholder="Digite aqui"
+                           ng-model="cliente.Nome" />
+                    <br />
+
+                    <label>Email do Cliente:</label>
+                    <input type="text" class="form-control"
+                           placeholder="Digite aqui"
+                           ng-model="cliente.Email" />
+                    <br />
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-warning" data-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button class="btn btn-primary" data-dismiss="modal"
+                            ng-click="atualizar()">
+                        Atualizar Cliente
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- arquivos javascript -->
+    <script src="/Scripts/jquery-3.0.0.min.js"></script>
+    <script src="/Scripts/bootstrap.min.js"></script>
+    <script src="/Scripts/angular.min.js"></script>
+
+    <script>
+
+        var app = angular.module('appCliente', []);
+
+        app.controller('consultaCliente',
+            function ($scope, $http) {
+
+                //função para excluir o cliente
+                $scope.excluir = function () {
+                    $http.delete("http://localhost:56468/api/Cliente/"
+                        + $scope.cliente.IdCliente)
+                        .then(function (d) {
+                            $scope.mensagem = d.data;
+                            $scope.consultar();
+                        })
+                        .catch(function (e) {
+                            $scope.mensagem = e.data;
+                        });
+                };
+
+                //função para atualizar o cliente
+                $scope.atualizar = function () {
+                    $http.put("http://localhost:56468/api/Cliente/",
+                        $scope.cliente)
+                        .then(function (d) {
+                            $scope.mensagem = d.data;
+                            $scope.consultar();
+                        })
+                        .catch(function (e) {
+                            $scope.mensagem = e.data;
+                        });
+                }
+
+                //função para obter 1 cliente pelo id
+                $scope.obter = function (id) {
+
+                    $http.get("http://localhost:56468/api/Cliente/" + id)
+                        .then(function (d) {
+                            $scope.cliente = d.data;
+                        })
+                        .catch(function (e) {
+                            $scope.mensagem = e.data;
+                        });
+                }
+
+                //função para executar a consulta
+                $scope.consultar = function () {
+
+                    //executar o serviço GET da api
+                    $http.get("http://localhost:56468/api/Cliente")
+                        .then(function (d) {
+                            $scope.clientes = d.data;
+                        })
+                        .catch(function (e) {
+                            $scope.mensagem = e.data;
+                        });
+                }
+            });
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html ng-app="appCliente">
+<head>
+    <meta charset="utf-8" />
+    <title>Projeto</title>
+
+    <!-- folhas de estilo CSS -->
+    <link href="/Content/bootstrap.min.css" rel="stylesheet" />
+
+</head>
+<body ng-controller="cadastroCliente">
+
+    <div class="card card-body bg-dark">
+        <h3 class="text-white">Sistema de Controle de Clientes</h3>
+        <p class="text-white">
+            Sistema Asp.Net WebAPI + Dapper + AngularJS
+        </p>
+    </div>
+
+    <div class="container">
+
+        <br />
+
+        <h4>Cadastro de Clientes</h4>
+        <a href="/Index.html">Página inicial</a>
+        <hr/>
+
+        <div class="row">
+            <div class="col-md-4">
+
+                <label>Nome do Cliente:</label>
+                <input type="text" class="form-control"
+                       placeholder="Digite aqui"
+                       ng-model="cliente.Nome"/>
+                <br/>
+
+                <label>Email do Cliente:</label>
+                <input type="text" class="form-control"
+                       placeholder="Digite aqui"
+                       ng-model="cliente.Email"/>
+                <br />
+
+                <button class="btn btn-success"
+                        ng-click="cadastrar()">
+                    Cadastrar Cliente
+                </button>
+                <br/>
+                <br/>
+
+                <strong>{{mensagem}}</strong>
+
+            </div>
+        </div>        
+
+    </div>
+
+    <!-- arquivos javascript -->
+    <script src="/Scripts/jquery-3.0.0.min.js"></script>
+    <script src="/Scripts/bootstrap.min.js"></script>
+    <script src="/Scripts/angular.min.js"></script>
+
+    <script>
+
+        //Passo 1) Criar um módulo (programa) baseado em angular
+        var app = angular.module('appCliente', []);
+
+        //Passo 2) Criar um controller..
+        app.controller('cadastroCliente',
+            function ($scope, $http) {
+
+                //criando uma função para 
+                //realizar o cadastro do cliente
+                $scope.cadastrar = function () {
+
+                    //criando uma variavel
+                    $scope.mensagem = "Processando, por favor aguarde.";
+
+                    //executando a API
+                    $http.post("http://localhost:56468/api/Cliente", $scope.cliente)
+                        .then(function (d) {
+                            $scope.mensagem = d.data;     
+                            $scope.cliente = {};
+                        })
+                        .catch(function (e) {
+                            $scope.mensagem = e.data; //PROVISÓRIO!
+                        });
+                };
+        });
+
+    </script>
+
+</body>
+</html>
